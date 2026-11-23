@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Fipod × COMPOUND · Demo del asistente</title>
+<meta name="description" content="Demo para Clínica Fipod: el asistente que contesta el WhatsApp de la clínica, da citas, recuerda, recupera pacientes y pasa lo clínico al equipo.">
+<meta property="og:title" content="Fipod × COMPOUND · Demo del asistente de WhatsApp">
+<meta property="og:description" content="Seis momentos de una semana en Fipod y lo que hace el asistente mientras el equipo atiende a sus pacientes.">
+<meta property="og:image" content="https://htremc.github.io/fipod-demo/og.jpg">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0b100d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 48'%3E%3Crect x='.5' y='.5' width='29' height='47' rx='14.5' fill='%230f1512'/%3E%3Cpath d='M6.5 26.5 13 20.4v18.4a2 2 0 0 1-2 2H8.5a2 2 0 0 1-2-2Z' fill='%2370e898'/%3E%3Cpath d='M16 8.6c5 0 7.4 5.8 7.4 11.5v14.6c0 3.7-2.4 5.6-5 5.6H16Z' fill='%2370e898'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fondo:#0b100d; --tinta:#0f1512; --carbon:#151c18; --carbon2:#1b2420; --papel:#f7faf8; --hueso:#e9f0ec;
+  --menta:#70e898; --menta2:#c9f7d9; --verde:#0f7a43; --acento:#ff6b3d; --acento-osc:#d2461b; --acento2:#ffe1d4;
+  --gris:#9aaba2; --linea:rgba(247,250,248,.12);
+  --display:"Barlow","Manrope",system-ui,sans-serif; --sans:"Manrope",system-ui,sans-serif;
+  --top:64px; --bot:56px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--fondo);color:var(--papel);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+a{color:inherit}
+.fondo{position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(1100px 680px at 78% 42%,rgba(112,232,152,.11),transparent 62%),radial-gradient(900px 620px at 8% 96%,rgba(255,107,61,.09),transparent 60%),var(--fondo)}
+.fondo::after{content:"";position:absolute;inset:0;opacity:.06;background-image:radial-gradient(rgba(255,255,255,.9) 1px,transparent 1px);background-size:26px 26px;mask-image:radial-gradient(ellipse at 60% 45%,#000 20%,transparent 72%)}
+.palabra{position:fixed;right:-2vw;bottom:-6vh;font-family:var(--display);font-weight:800;font-size:min(34vw,62vh);line-height:.8;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1.5px rgba(112,232,152,.09);pointer-events:none;white-space:nowrap;transition:opacity .6s}
+
+/* cabecera */
+.prog{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--menta),var(--acento));z-index:30;transition:width .5s ease}
+.top{position:fixed;top:0;left:0;right:0;height:var(--top);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 clamp(16px,4vw,56px);z-index:20}
+.marca{display:flex;align-items:center;gap:12px;font-family:var(--display);font-weight:700;letter-spacing:.02em;font-size:22px;white-space:nowrap}
+.marca .fp{display:flex;align-items:center}
+.marca .fp svg{height:19px;width:12.5px;margin:0 1px}
+.marca .x{color:var(--gris);font-size:14px;font-weight:600}
+.marca .cp{font-size:15px;letter-spacing:.14em;color:var(--menta)}
+.contador{display:flex;align-items:center;gap:10px;padding:6px 6px 6px 16px;border:1px solid var(--linea);border-radius:999px;background:rgba(15,21,18,.6);backdrop-filter:blur(6px);font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.contador b{font-family:var(--display);font-size:16px;letter-spacing:0;padding:4px 12px;border-radius:999px;background:var(--menta);color:var(--tinta)}
+.contador b.c2{background:var(--acento);color:#fff}
+.contador .sep{width:1px;height:18px;background:var(--linea)}
+.botones{display:flex;gap:8px}
+.bt{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--linea);border-radius:999px;padding:8px 14px;font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,border-color .2s,color .2s}
+.bt:hover{border-color:rgba(247,250,248,.35)}
+.bt.on{background:var(--menta);color:var(--tinta);border-color:var(--menta)}
+.bt svg{width:13px;height:13px}
+
+/* puntos */
+.puntos{position:fixed;right:clamp(12px,2vw,26px);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:20}
+.puntos button{width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(247,250,248,.45);transition:all .25s}
+.puntos button.on{background:var(--menta);border-color:var(--menta);transform:scale(1.25)}
+.puntos button:hover{border-color:var(--papel)}
+
+/* pie */
+.pie{position:fixed;left:0;right:0;bottom:0;height:var(--bot);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,56px);z-index:20}
+.pie .rep{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gris)}
+.pie .rep:hover{color:var(--papel)}
+.pie .nav{display:flex;align-items:center;gap:10px}
+.pie .num{font-family:var(--display);font-weight:700;font-size:15px;color:var(--gris);min-width:44px;text-align:center}
+.flecha{width:40px;height:40px;border-radius:50%;border:1px solid var(--linea);display:grid;place-items:center}
+.flecha svg{width:16px;height:16px}
+.flecha:disabled{opacity:.3;cursor:default}
+.sig{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 18px;background:var(--papel);color:var(--tinta);font-weight:800;font-size:14px;box-shadow:0 0 0 0 rgba(112,232,152,.0);transition:transform .2s,box-shadow .4s}
+.sig.listo{background:var(--menta);animation:late 1.8s ease-in-out infinite}
+@keyframes late{0%,100%{box-shadow:0 0 0 0 rgba(112,232,152,.45)}50%{box-shadow:0 0 0 10px rgba(112,232,152,0)}}
+
+/* escena */
+.escena{position:fixed;left:0;right:0;top:var(--top);bottom:var(--bot);display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:clamp(28px,3.6vw,60px);padding:0 clamp(52px,6vw,110px) 0 clamp(16px,5.5vw,96px)}
+.fuera{animation:sale .32s ease forwards}
+.escena.dentro{animation:entra .55s cubic-bezier(.2,.75,.2,1) both}
+@keyframes sale{to{opacity:0;transform:translateY(-14px)}}
+@keyframes entra{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.texto{max-width:600px;min-width:0}
+.kicker{display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:var(--acento)}
+.kicker i{width:8px;height:8px;border-radius:50%;background:var(--acento);box-shadow:0 0 0 4px rgba(255,107,61,.22);animation:lat 1.6s infinite}
+@keyframes lat{50%{box-shadow:0 0 0 7px rgba(255,107,61,0)}}
+h1,h2{font-family:var(--display);font-weight:700;line-height:.98;letter-spacing:-.01em;margin:16px 0 0}
+h1{font-size:clamp(2.4rem,min(5.4vw,10.5vh),5.2rem)}
+h2{font-size:clamp(2rem,min(4.3vw,8.6vh),4.2rem)}
+h1 em,h2 em{font-style:normal;color:var(--menta)}
+h1 .c,h2 .c{color:var(--acento)}
+.texto p{font-size:clamp(15px,min(1.25vw,2.5vh),18.5px);line-height:1.55;color:rgba(247,250,248,.78);margin:16px 0 0;max-width:34em}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:999px;background:rgba(112,232,152,.12);color:var(--menta2);border:1px solid rgba(112,232,152,.25)}
+.chip.c{background:rgba(255,107,61,.12);color:var(--acento2);border-color:rgba(255,107,61,.3)}
+.logro{display:flex;align-items:center;gap:18px;margin-top:clamp(16px,3vh,28px)}
+.logro .caja{flex:none;position:relative;padding:12px 22px 14px;border-radius:18px;background:var(--papel);color:var(--tinta);box-shadow:6px 6px 0 var(--menta);transform:rotate(-1.5deg)}
+.logro .caja small{display:block;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--verde)}
+.logro .caja b{display:block;font-family:var(--display);font-weight:800;font-size:clamp(2.3rem,min(4.2vw,8vh),3.6rem);line-height:1;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.logro .caja.c{box-shadow:6px 6px 0 var(--acento)}
+.logro .caja.c small{color:var(--acento-osc)}
+.logro span{font-size:14px;line-height:1.45;color:rgba(247,250,248,.72);max-width:17em}
+.logro.pend .caja{opacity:.55}
+
+/* móvil (teléfono) */
+.movil{position:relative;height:min(calc(100dvh - var(--top) - var(--bot) - 26px),720px);aspect-ratio:.5;max-width:370px;border-radius:46px;padding:9px;background:linear-gradient(155deg,#2b332f,#0d110f 60%);box-shadow:0 0 0 1.5px rgba(255,255,255,.08),0 40px 80px -24px rgba(0,0,0,.75),0 0 90px -20px rgba(112,232,152,.25)}
+.movil::before{content:"";position:absolute;inset:-8px -8px -8px auto;width:0}
+.pantalla{position:relative;height:100%;border-radius:38px;overflow:hidden;display:flex;flex-direction:column;background:#efeae2;color:#111b21}
+.isla{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:31%;height:23px;border-radius:14px;background:#000;z-index:5}
+.wa-cab{display:flex;align-items:center;gap:9px;padding:40px 12px 9px;background:#f6f5f3;border-bottom:1px solid #e3e0db;flex:none}
+.wa-cab .atr{color:#0b8a6c;font-size:20px;line-height:1;margin-right:-2px}
+.ava{width:36px;height:36px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px #e3e0db;display:grid;place-items:center;flex:none}
+.ava svg{height:22px}
+.wa-cab .n{font-weight:700;font-size:14.5px;line-height:1.15}
+.wa-cab .s{font-size:11.5px;color:#667781;line-height:1.2}
+.wa-cab .s.esc{color:#0b8a6c;font-weight:600}
+.msgs{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:12px 10px 8px;display:flex;flex-direction:column;gap:5px;scrollbar-width:none;
+  background-color:#efeae2;background-image:radial-gradient(rgba(17,27,33,.045) 1.2px,transparent 1.2px);background-size:18px 18px}
+.msgs::-webkit-scrollbar{display:none}
+.msgs>*{flex-shrink:0}
+.dia{align-self:center;font-size:11px;font-weight:600;color:#54656f;background:#fff;border-radius:7px;padding:4px 10px;margin:2px 0 6px;box-shadow:0 1px .5px rgba(11,20,26,.1)}
+.aviso-ia{align-self:center;max-width:90%;text-align:center;font-size:10.5px;line-height:1.35;color:#54656f;background:#fdf6d8;border-radius:7px;padding:5px 9px;margin-bottom:6px}
+.msg{position:relative;max-width:84%;padding:6px 8px 5px;border-radius:9px;font-size:13.2px;line-height:1.38;box-shadow:0 1px .5px rgba(11,20,26,.13);animation:pop .28s cubic-bezier(.2,.8,.3,1.2) both;word-wrap:break-word}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+.msg.fip{align-self:flex-start;background:#fff;border-top-left-radius:2px}
+.msg.pac{align-self:flex-end;background:#d9fdd3;border-top-right-radius:2px}
+.msg .h{float:right;margin:6px 0 -3px 10px;font-size:10px;color:#667781;line-height:1.6;white-space:nowrap}
+.msg.pac .h::after{content:" ✓✓";color:#53bdeb;letter-spacing:-2px}
+.msg strong{font-weight:700}
+.msg.pensando{padding:10px 12px}
+.puntitos{display:flex;gap:4px}
+.puntitos span{width:6px;height:6px;border-radius:50%;background:#8696a0;animation:bote 1.1s infinite}
+.puntitos span:nth-child(2){animation-delay:.15s}.puntitos span:nth-child(3){animation-delay:.3s}
+@keyframes bote{0%,60%,100%{transform:none;opacity:.6}30%{transform:translateY(-4px);opacity:1}}
+.rbtns{display:flex;flex-direction:column;gap:3px;margin-top:3px;align-self:flex-start;width:84%;animation:pop .28s both}
+.rbtns.grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.rbtns button{background:#fff;border-radius:8px;padding:8px 6px;font-size:13px;font-weight:600;color:#027eb5;box-shadow:0 1px .5px rgba(11,20,26,.13);transition:background .2s,transform .2s}
+.rbtns button.tap{background:#d8f1fb;transform:scale(.96)}
+.rbtns.usado button:not(.tap){opacity:.55}
+.tarjeta{padding:0;overflow:hidden;width:84%}
+.tarjeta .cab{background:var(--tinta);color:var(--menta);font-weight:800;font-size:12px;letter-spacing:.06em;padding:8px 10px;display:flex;align-items:center;gap:7px}
+.tarjeta .cab.c{background:var(--acento);color:#fff}
+.tarjeta .fil{display:flex;gap:8px;padding:6px 10px 0;font-size:12.8px;line-height:1.35}
+.tarjeta .fil i{font-style:normal;width:16px;text-align:center;flex:none}
+.tarjeta .pi{padding:7px 10px 8px;font-size:11.5px;color:#54656f}
+.tarjeta .h{margin:0 8px 6px 0}
+.enlace{padding:4px 4px 5px;width:84%}
+.enlace .pre{display:flex;gap:9px;align-items:center;background:#f5f6f6;border-radius:7px;padding:8px}
+.enlace .pre .ic{width:40px;height:40px;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px #e3e0db;display:grid;place-items:center;flex:none}
+.enlace .pre b{display:block;font-size:12.8px}
+.enlace .pre small{display:block;font-size:11.5px;color:#54656f}
+.enlace .estr{color:#f5b301;letter-spacing:1px}
+.enlace .tx{padding:6px 4px 0;font-size:13px}
+.mapa{height:84px;border-radius:7px;margin:0 0 6px;position:relative;overflow:hidden;background:#e8eef0;
+  background-image:linear-gradient(90deg,transparent 47%,#fff 47%,#fff 53%,transparent 53%),linear-gradient(0deg,transparent 40%,#fff 40%,#fff 46%,transparent 46%),linear-gradient(28deg,transparent 60%,#dfe7d9 60%);}
+.mapa::after{content:"";position:absolute;left:50%;top:42%;width:18px;height:18px;margin:-18px 0 0 -9px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--acento);box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.wa-pie{flex:none;display:flex;align-items:center;gap:7px;padding:7px 8px 14px;background:#f6f5f3}
+.campo{flex:1;min-width:0;background:#fff;border-radius:20px;padding:8px 13px;font-size:13px;color:#8696a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:34px}
+.campo.lleno{color:#111b21}
+.mic{width:34px;height:34px;border-radius:50%;background:#1daa61;display:grid;place-items:center;flex:none;color:#fff}
+.mic svg{width:15px;height:15px}
+.brindis{position:absolute;left:8px;right:8px;top:84px;z-index:6;display:none;align-items:center;gap:8px;padding:9px 11px;border-radius:12px;background:rgba(15,21,18,.92);color:var(--papel);font-size:11.8px;line-height:1.3;box-shadow:0 10px 24px -8px rgba(0,0,0,.5);transform:translateY(-8px);opacity:0;transition:all .35s}
+.brindis.on{transform:none;opacity:1}
+.brindis i{font-style:normal;width:22px;height:22px;border-radius:7px;background:var(--menta);color:var(--tinta);display:grid;place-items:center;font-size:12px;flex:none}
+
+/* tarjeta lateral (lo que pasa por dentro) */
+.lado{width:clamp(250px,20vw,310px);align-self:center}
+.lado h4{margin:0 0 10px;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--gris);display:flex;align-items:center;gap:8px}
+.lado h4 .vivo{display:inline-flex;align-items:center;gap:5px;color:var(--menta);letter-spacing:.1em}
+.lado h4 .vivo::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--menta);animation:lat 1.6s infinite}
+.panel{border:1px solid var(--linea);border-radius:20px;background:rgba(21,28,24,.82);backdrop-filter:blur(8px);overflow:hidden}
+.panel .tit{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid var(--linea);font-weight:800;font-size:14px}
+.panel .tit small{font-size:11px;font-weight:700;color:var(--menta);border:1px solid rgba(112,232,152,.35);border-radius:999px;padding:3px 8px}
+.franja{display:grid;grid-template-columns:46px 1fr;gap:10px;align-items:center;padding:7px 15px;font-size:12.5px;border-bottom:1px solid rgba(247,250,248,.06);transition:background .5s}
+.franja:last-child{border-bottom:0}
+.franja .hh{font-family:var(--display);font-weight:700;color:var(--gris);font-size:14px}
+.franja .q{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:30px;padding:5px 9px;border-radius:9px;background:rgba(247,250,248,.05);color:rgba(247,250,248,.5)}
+.franja .q.libre{background:transparent;border:1px dashed rgba(247,250,248,.2);color:rgba(247,250,248,.42)}
+.franja .q.nueva{background:var(--menta);color:var(--tinta);font-weight:700;animation:llena .6s cubic-bezier(.2,.8,.3,1.2)}
+.franja .q.espera{background:rgba(255,107,61,.16);color:var(--acento2);border:1px solid rgba(255,107,61,.4)}
+.franja .q em{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.75;white-space:nowrap}
+@keyframes llena{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.estado{display:flex;align-items:center;gap:8px;padding:11px 15px;font-size:12px;font-weight:700;color:var(--menta2);background:rgba(112,232,152,.07);border-top:1px solid var(--linea)}
+.dato{display:flex;gap:10px;align-items:flex-start;padding:10px 15px;border-bottom:1px solid rgba(247,250,248,.06);font-size:12.8px;line-height:1.4;color:rgba(247,250,248,.5);transition:color .4s}
+.dato .tk{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(247,250,248,.25);display:grid;place-items:center;font-size:11px;flex:none;transition:all .35s;color:transparent}
+.dato.ok{color:var(--papel)}
+.dato.ok .tk{background:var(--menta);border-color:var(--menta);color:var(--tinta)}
+.dato small{display:block;color:var(--gris);font-size:11px}
+.gficha{padding:15px}
+.gficha .nm{font-weight:800;font-size:15px}
+.gficha .nota{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--gris)}
+.gficha .nota b{font-family:var(--display);font-size:26px;color:var(--papel)}
+.gficha .estr{color:#f5b301;letter-spacing:1.5px}
+.gficha .cnt{font-variant-numeric:tabular-nums;transition:color .3s}
+.gficha .cnt.sube{color:var(--menta)}
+.resena{margin:0 15px 15px;padding:11px 12px;border-radius:12px;background:var(--papel);color:var(--tinta);font-size:12.5px;line-height:1.4;animation:llena .6s both}
+.resena .q1{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:12.5px}
+.resena .q1 .estr{color:#f5b301}
+.resena small{color:#54656f;font-size:11px}
+.bandeja .it{margin:12px;padding:12px;border-radius:14px;background:rgba(247,250,248,.06);border:1px solid var(--linea);animation:llena .6s both}
+.bandeja .pr{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#e5484d;border-radius:999px;padding:3px 9px}
+.bandeja .nm{margin-top:8px;font-weight:800;font-size:13.5px}
+.bandeja ul{margin:6px 0 0;padding-left:17px;font-size:12.3px;line-height:1.45;color:rgba(247,250,248,.78)}
+.bandeja .quien{margin-top:10px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--gris)}
+.bandeja .quien.ok{color:var(--menta)}
+.bandeja .vacia{padding:22px 15px;font-size:12.5px;color:var(--gris);text-align:center}
+
+/* portada */
+.portada .texto{max-width:680px}
+.cta{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:28px}
+.cta .pri{display:inline-flex;align-items:center;gap:10px;padding:16px 26px;border-radius:16px;background:var(--menta);color:var(--tinta);font-weight:800;font-size:16px;box-shadow:5px 5px 0 var(--papel);transition:transform .2s,box-shadow .2s}
+.cta .pri:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--papel)}
+.cta .sec{padding:15px 20px;border-radius:16px;border:1px solid var(--linea);font-weight:700;font-size:14.5px}
+.nota-pie{margin-top:22px;font-size:12px;color:var(--gris);max-width:36em;line-height:1.5}
+.cinta{position:fixed;left:-2vw;right:-2vw;bottom:calc(var(--bot) + 6px);transform:rotate(-1.6deg);background:var(--acento);color:#fff;padding:10px 0;overflow:hidden;white-space:nowrap;z-index:1;font-family:var(--display);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:15px}
+.cinta div{display:inline-block;animation:cinta 38s linear infinite}
+@keyframes cinta{to{transform:translateX(-50%)}}
+.lista{flex:1;min-height:0;overflow:hidden;background:#fff}
+.lista .busca{margin:8px 10px;padding:8px 12px;border-radius:20px;background:#f0f2f5;color:#8696a0;font-size:12.5px}
+.lista .ch{display:flex;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid #f0f2f5;animation:pop .35s both}
+.lista .ch .av{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff}
+.lista .ch .md{flex:1;min-width:0}
+.lista .ch .md b{display:block;font-size:13.5px}
+.lista .ch .md span{display:block;font-size:12px;color:#667781;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lista .ch .md span.res{color:#0b8a6c;font-weight:600}
+.lista .ch .rt{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:10.5px;color:#1daa61;font-weight:700}
+.lista .ch .rt i{font-style:normal;min-width:19px;height:19px;border-radius:10px;background:#25d366;color:#fff;display:grid;place-items:center;font-size:10.5px;padding:0 5px}
+.lista .ch .rt.hecho{color:#667781}
+
+/* panel semanal */
+.semana{position:fixed;left:0;right:0;top:var(--top);bottom:var(--bot);padding:0 clamp(52px,6vw,110px) 0 clamp(16px,5.5vw,96px);display:flex;flex-direction:column;justify-content:center;overflow-y:auto}
+.semana h2{max-width:900px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.4vw,18px);margin-top:clamp(16px,3vh,28px)}
+.kpi{border-radius:20px;padding:clamp(12px,2vh,18px) clamp(14px,1.4vw,20px);background:var(--papel);color:var(--tinta);box-shadow:5px 5px 0 rgba(247,250,248,.16)}
+.kpi.m{background:var(--menta)}
+.kpi small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--verde)}
+.kpi b{display:block;font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,min(3.4vw,6.4vh),3.1rem);line-height:1.05;margin-top:4px;font-variant-numeric:tabular-nums}
+.kpi span{display:block;font-size:12.5px;color:#3f4b45;margin-top:2px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.4vw,18px);margin-top:clamp(10px,2vh,18px)}
+.caja2{border:1px solid var(--linea);border-radius:20px;background:rgba(21,28,24,.82);padding:clamp(12px,2vh,18px) 18px}
+.caja2 h3{margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.caja2 h3 small{color:var(--acento);font-size:11px;letter-spacing:.1em}
+.feed{display:flex;flex-direction:column;gap:7px}
+.feed div{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:11px;background:rgba(247,250,248,.05);font-size:13px;animation:llena .5s both}
+.feed div i{font-style:normal;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:rgba(112,232,152,.15);font-size:12px;flex:none}
+.feed div span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feed div em{font-style:normal;font-weight:800;color:var(--menta);font-size:12px;white-space:nowrap}
+.barras{display:flex;align-items:flex-end;gap:10px;height:clamp(90px,19vh,170px);padding-top:18px}
+.barras .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+.barras .b .col{width:100%;border-radius:9px 9px 4px 4px;background:var(--menta);height:0;transition:height .9s cubic-bezier(.2,.8,.2,1);position:relative}
+.barras .b .col.c{background:var(--acento)}
+.barras .b .col::before{content:attr(data-v);position:absolute;top:-19px;left:0;right:0;text-align:center;font-size:12px;font-weight:800;color:var(--papel)}
+.barras .b small{font-size:11.5px;color:var(--gris)}
+.leyenda{display:flex;gap:14px;margin-top:10px;font-size:11.5px;color:var(--gris)}
+.leyenda i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+/* cierre */
+.cierre .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(10px,1.2vw,16px);margin-top:clamp(16px,3vh,26px)}
+.tile{border-radius:20px;padding:clamp(12px,2.2vh,20px) clamp(12px,1.2vw,18px);background:rgba(21,28,24,.85);border:1px solid var(--linea)}
+.tile b{display:block;font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,min(3.2vw,6.4vh),3rem);line-height:1;color:var(--menta)}
+.tile.c b{color:var(--acento)}
+.tile span{display:block;font-size:13px;line-height:1.42;color:rgba(247,250,248,.8);margin-top:8px}
+.tile em{display:block;font-style:normal;margin-top:8px;font-size:12px;font-weight:800;color:var(--menta2)}
+.total{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;margin-top:clamp(14px,2.6vh,22px);padding:clamp(12px,2vh,16px) 22px;border-radius:18px;background:var(--papel);color:var(--tinta)}
+.total b{font-family:var(--display);font-weight:800;font-size:clamp(1.5rem,min(2.6vw,5vh),2.3rem)}
+.total span{font-size:14px;color:#3f4b45;flex:1;min-width:260px}
+.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,1.2vw,16px);margin-top:clamp(12px,2.2vh,18px)}
+.paso{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;line-height:1.45;color:rgba(247,250,248,.82)}
+.paso i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--acento);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.notita{margin-top:clamp(10px,1.8vh,16px);font-size:11.5px;color:var(--gris);line-height:1.5}
+.cierre .cta{margin-top:clamp(12px,2.4vh,22px)}
+
+/* tamaños intermedios: la tarjeta lateral pasa a aviso dentro del móvil */
+@media (max-width:1179px){
+  .lado{display:none}
+  .brindis{display:flex}
+  .escena{grid-template-columns:minmax(0,1fr) auto}
+  .cierre .tiles{grid-template-columns:repeat(3,1fr)}
+  .cierre .tiles .tile:nth-child(n+4){display:none}
+}
+@media (max-height:700px) and (min-width:820px){
+  .texto p{margin-top:12px}
+  .chips{margin-top:12px}
+  .logro{margin-top:14px}
+  .logro .caja{padding:9px 18px 10px}
+  .kpi span{display:none}
+  .pasos,.notita{display:none}
+}
+
+/* teléfono pequeño */
+@media (max-width:819px){
+  :root{--top:52px;--bot:58px}
+  .marca{font-size:18px;gap:8px}.marca .cp{font-size:12px}.marca .x{font-size:12px}
+  .contador{position:fixed;top:var(--top);left:50%;transform:translateX(-50%);padding:4px 4px 4px 11px;font-size:9.5px;gap:7px;z-index:21}
+  .contador b{font-size:13px;padding:2px 9px}
+  .contador .sep{display:none}
+  .botones .bt span{display:none}
+  .botones .bt{padding:8px 10px}
+  .puntos{display:none}
+  .palabra{display:none}
+  .escena{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:10px;padding:40px 16px 8px}
+  .texto{flex:none}
+  .kicker{font-size:10.5px;letter-spacing:.13em}
+  h2{font-size:clamp(1.45rem,6.6vw,2rem);margin-top:8px;line-height:1.02}
+  h1{font-size:clamp(2rem,9.6vw,2.8rem)}
+  .texto p,.chips{display:none}
+  .logro{margin-top:8px;gap:10px}
+  .logro .caja{padding:5px 12px 6px;border-radius:12px;box-shadow:4px 4px 0 var(--menta);transform:none}
+  .logro .caja.c{box-shadow:4px 4px 0 var(--acento)}
+  .logro .caja small{font-size:9px}
+  .logro .caja b{font-size:1.55rem}
+  .logro span{font-size:12px}
+  .movil{flex:1;min-height:0;height:auto;max-height:none;align-self:center;aspect-ratio:auto;width:min(100%,calc((100dvh - 230px) * .56));border-radius:34px;padding:7px}
+  .pantalla{border-radius:28px}
+  .isla{height:19px;top:7px}
+  .wa-cab{padding-top:32px}
+  .escena.portada{justify-content:center;padding-bottom:64px}
+  .portada .texto p{display:block;font-size:14.5px;margin-top:10px}
+  .portada .movil{display:none}
+  .cta{margin-top:20px}
+  .cta .pri{padding:14px 20px;font-size:15px}
+  .cinta{font-size:12px;padding:8px 0}
+  .semana{padding:34px 16px 12px;justify-content:flex-start}
+  .kpis{grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+  .kpi{padding:10px 12px;border-radius:15px}
+  .kpi b{font-size:1.7rem}
+  .kpi span{font-size:11px}
+  .duo{grid-template-columns:1fr;gap:9px;margin-top:9px}
+  .duo .caja2:first-child{display:none}
+  .barras{height:110px}
+  .cierre .tiles{grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+  .cierre .tiles .tile:nth-child(n+4){display:none}
+  .cierre .tiles .tile:nth-child(3){grid-column:span 2}
+  .tile{padding:11px 12px;border-radius:15px}
+  .tile b{font-size:1.65rem}
+  .tile span{font-size:12px;margin-top:5px}
+  .tile em{margin-top:5px;font-size:11px}
+  .total{padding:11px 14px;margin-top:10px;flex-direction:column;align-items:flex-start;gap:3px}
+  .total b{font-size:1.35rem}
+  .total span{font-size:12px;min-width:0}
+  .pasos{display:none}
+  .notita{font-size:10.5px}
+  .pie .rep{display:none}
+  .sig{padding:10px 16px;font-size:13.5px}
+}
+@media (max-width:819px) and (max-height:700px){
+  .logro span{display:none}
+  .barras{height:84px}
+  .kpi span{display:none}
+  .notita{display:none}
+  .movil{width:min(100%,calc((100dvh - 200px) * .58))}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .cinta div{animation:none}
+}
+.oculto{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="fondo"></div>
+<div class="palabra" id="palabra" aria-hidden="true">24/7</div>
+<div class="prog" id="prog"></div>
+
+<header class="top">
+  <div class="marca" aria-label="Fipod por COMPOUND">
+    <span class="fp">FIP<svg viewBox="0 0 30 48" aria-hidden="true"><rect x=".5" y=".5" width="29" height="47" rx="14.5" fill="#f7faf8"/><path d="M6.5 26.5 13 20.4v18.4a2 2 0 0 1-2 2H8.5a2 2 0 0 1-2-2Z" fill="#0f7a43"/><path d="M16 8.6c5 0 7.4 5.8 7.4 11.5v14.6c0 3.7-2.4 5.6-5 5.6H16Z" fill="#0f7a43"/></svg>D</span>
+    <span class="x">×</span><span class="cp">COMPOUND</span>
+  </div>
+  <div class="contador" aria-live="polite">
+    <span class="t1">Tiempo devuelto</span><b id="cMin">0 min</b><span class="sep t1"></span><span>Citas</span><b class="c2" id="cCitas">+0</b>
+  </div>
+  <div class="botones">
+    <button class="bt" id="bAuto" aria-pressed="false" title="Pasa solo de escena (A)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg><span>Automático</span></button>
+    <button class="bt" id="bPant" title="Pantalla completa (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Pantalla</span></button>
+  </div>
+</header>
+
+<nav class="puntos" id="puntos" aria-label="Escenas"></nav>
+<main id="raiz"></main>
+
+<footer class="pie">
+  <button class="rep" id="bRep">↻ Repetir escena (R)</button>
+  <div class="nav">
+    <button class="flecha" id="bAnt" aria-label="Escena anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="num" id="num">1/9</span>
+    <button class="sig" id="bSig">Siguiente <span aria-hidden="true">→</span></button>
+  </div>
+</footer>
+
+<script>
+(() => {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const Q = new URLSearchParams(location.search);
+const REDUCIDO = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let VEL = Q.has("rapido") ? 0.06 : 1;
+const OMARCA = '<svg viewBox="0 0 30 48" aria-hidden="true"><rect x=".5" y=".5" width="29" height="47" rx="14.5" fill="#0f1512"/><path d="M6.5 26.5 13 20.4v18.4a2 2 0 0 1-2 2H8.5a2 2 0 0 1-2-2Z" fill="#70e898"/><path d="M16 8.6c5 0 7.4 5.8 7.4 11.5v14.6c0 3.7-2.4 5.6-5 5.6H16Z" fill="#70e898"/></svg>';
+const MIC = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-2.1A7 7 0 0 0 19 12Z"/></svg>';
+
+/* ── Datos de Fipod (los de su web y su ficha pública) ─────────────────── */
+const FIPOD = { calle: "calle de Escosura, 15", barrio: "Chamberí", metro: "Quevedo o San Bernardo", horario: "de lunes a viernes, de 10:00 a 14:00 y de 16:00 a 20:00" };
+
+/* ── Escenas ────────────────────────────────────────────────────────────── */
+const ESCENAS = [
+  { id: "portada", tipo: "portada", palabra: "24/7" },
+  {
+    id: "noche", palabra: "23:47", min: 6, citas: 1,
+    kicker: "Domingo · 23:47 · la clínica, cerrada",
+    titulo: 'A las 23:47 nadie coge el teléfono. <em>El asistente, sí.</em>',
+    texto: "Laura lleva un mes con dolor en el talón. El domingo por la noche escribe al WhatsApp de Fipod y se va a dormir con su primera visita reservada, sin esperar al lunes ni llamar a nadie.",
+    chips: ["Citas 24/7", "Conectado a vuestra agenda", "Sin consejo clínico"],
+    logro: { small: "Cita nueva", big: "+1", sub: "Con la clínica cerrada. Respondida en 4 segundos." },
+    lado: "agenda", hora: "23:47", diaChat: "HOY",
+    agenda: { dia: "Martes", filas: [["10:30", "Ocupado"], ["12:00", "Ocupado"], ["16:00", "Ocupado"], ["17:00", null], ["18:30", "Ocupado"]] },
+    pasos: [
+      { p: "Hola! Llevo un mes con dolor en el talón, sobre todo al levantarme por la mañana. ¿Me podéis ver esta semana?" },
+      { f: "Hola, Laura 👋 Soy el asistente de Clínica Fipod. Siento lo del talón. Por aquí no puedo darte un diagnóstico, pero es justo lo que se valora en la <strong>primera visita de podología (31 €)</strong>. Si hace falta, en la misma visita se ve tu pisada." },
+      { f: "Estos son los huecos que quedan libres esta semana:", slots: ["Lun 10:30", "Mar 17:00", "Mié 12:15", "Jue 19:00"] },
+      { tap: "Mar 17:00" },
+      { fx: (L) => L.agendaLlena("17:00", "Laura M. · 1.ª visita", "asistente"), brindis: "Agenda · martes 17:00 · Laura M. · añadida ✓" },
+      { card: { cab: "✅ CITA CONFIRMADA", filas: [["🗓", "<strong>Martes, 17:00</strong>"], ["🦶", "Primera visita de podología · 31 €"], ["👩‍⚕️", "Con Tamara"], ["📍", "C/ de Escosura, 15 · metro Quevedo"]], pie: "Te recordaré la cita el día antes. Si necesitas cambiarla, escríbeme por aquí." } },
+      { p: "Genial, muchas gracias!! 🙏" },
+      { f: "¡A ti, Laura! Que descanses 😊" },
+    ],
+  },
+  {
+    id: "recordatorio", palabra: "-50%", min: 8, citas: 1,
+    kicker: "Lunes · 09:00 · recordatorios del día",
+    titulo: 'Una cita que se cambia <em>no es una cita perdida.</em>',
+    texto: "El día antes, cada paciente recibe su recordatorio. Javier no puede ir por la mañana: el asistente le pasa la cita a la tarde y ofrece el hueco libre a quien estaba esperando uno. La agenda no se queda con huecos vacíos.",
+    chips: ["Recordatorio automático", "Cambios sin llamar", "Lista de espera"],
+    logro: { small: "Huecos perdidos", big: "−50 %", sub: "Cada hueco que se libera se vuelve a ocupar.", c: true },
+    lado: "agenda", hora: "09:00", diaChat: "HOY",
+    agenda: { dia: "Martes", filas: [["10:00", "Javier R. · fisio"], ["11:00", "Ocupado"], ["16:30", "Ocupado"], ["17:30", null], ["19:00", null]] },
+    pasos: [
+      { f: "Hola, Javier 👋 Te recordamos tu cita de <strong>fisioterapia mañana, martes, a las 10:00</strong> con Elena en Clínica Fipod. ¿Nos confirmas?", btns: ["✔ Confirmo", "Cambiar la cita"], plantilla: true },
+      { tap: "Cambiar la cita" },
+      { p: "Me ha surgido algo por la mañana 😕 ¿Tenéis por la tarde?" },
+      { f: "¡Claro! Mañana por la tarde Elena tiene libre a las <strong>17:30</strong> o a las <strong>19:00</strong>. ¿Cuál te viene mejor?", btns: ["17:30", "19:00"], grid: true },
+      { tap: "17:30" },
+      { fx: (L) => { L.agendaLlena("17:30", "Javier R. · fisio", "cambiada"); L.agendaLibera("10:00"); }, brindis: "Agenda · Javier pasa a las 17:30 · se libera el 10:00" },
+      { f: "Hecho ✅ Tu fisioterapia pasa a <strong>mañana, martes, a las 17:30</strong> con Elena. ¡Hasta mañana, Javier!" },
+      { espera: 900 },
+      { fx: (L) => L.agendaEspera("10:00", "Ofrecido a la lista de espera") , brindis: "Lista de espera · el hueco de las 10:00, ofrecido" },
+      { espera: 1500 },
+      { fx: (L) => L.agendaLlena("10:00", "Ana P. · fisio", "lista de espera"), brindis: "Agenda · Ana P. coge el hueco de las 10:00 ✓" },
+    ],
+  },
+  {
+    id: "preguntas", palabra: "4 s", min: 12, citas: 0,
+    kicker: "Lunes · 11:20 · todas en consulta",
+    titulo: 'Las preguntas de cada día, <em>contestadas en 4 segundos.</em>',
+    texto: "Precios, mutuas, niños, cómo llegar… Mientras el equipo está con sus pacientes, el asistente contesta con los datos de Fipod. Lo que no sabe no se lo inventa: lo pasa al equipo.",
+    chips: ["Con vuestros precios reales", "No se inventa nada", "Sin interrumpir la consulta"],
+    logro: { small: "Llamadas que no cortan una sesión", big: "≈ 40", sub: "preguntas a la semana, contestadas solas (ejemplo)." },
+    lado: "datos", hora: "11:20", diaChat: "HOY",
+    datos: [["fisio", "Visita de fisioterapia", "desde 48 €"], ["mutuas", "Mutuas", "No: solo atención privada"], ["ninos", "Podología infantil", "Sí, con estudio de cómo pisan"], ["donde", "Dirección", "C/ de Escosura, 15 · Quevedo / San Bernardo"], ["horario", "Horario", "L-V · 10:00-14:00 y 16:00-20:00"]],
+    pasos: [
+      { p: "Hola, ¿cuánto cuesta la sesión de fisio?" },
+      { f: "¡Hola! La visita de fisioterapia en Fipod es <strong>desde 48 €</strong>. Si quieres, te busco hueco con Elena 🙂", fx: (L) => L.dato("fisio") },
+      { p: "¿Trabajáis con mutuas?" },
+      { f: "No trabajamos con mutuas: en Fipod la atención es <strong>solo privada</strong>.", fx: (L) => L.dato("mutuas") },
+      { p: "Vale. ¿Y veis a niños? Mi hijo de 7 años pisa un poco raro" },
+      { f: "Sí 😊 Tamara tiene consulta de <strong>podología y biomecánica infantil</strong>, para ver cómo pisan y cómo se desarrollan sus pies. ¿Te busco una cita para él?", fx: (L) => L.dato("ninos") },
+      { p: "Sí, pero primero dime dónde estáis" },
+      { mapa: true, f: "Estamos en la <strong>calle de Escosura, 15</strong> (Chamberí). Metro <strong>Quevedo</strong> o <strong>San Bernardo</strong>. Abrimos " + "de lunes a viernes, de 10:00 a 14:00 y de 16:00 a 20:00.", fx: (L) => { L.dato("donde"); L.dato("horario"); }, brindis: "Ha contestado con 5 datos de Fipod · 0 inventados" },
+    ],
+  },
+  {
+    id: "resena", palabra: "★★★★★", min: 3, citas: 0,
+    kicker: "Martes · 18:40 · después de la consulta",
+    titulo: 'Más reseñas en Google. <em>Las quejas, primero a la clínica.</em>',
+    texto: "Al salir de la visita, el asistente pregunta qué tal. Si ha ido bien, deja el enlace a vuestra ficha de Google. Si algo no ha gustado, no acaba en Google: le llega al equipo para arreglarlo. Y cada reseña nueva empuja el SEO.",
+    chips: ["Más reseñas", "Las quejas, en privado", "Ayuda al SEO"],
+    logro: { small: "Reseñas en Google", big: "142 → 143", sub: "Cada semana, sin pedirlas una a una." },
+    lado: "google", hora: "18:40", diaChat: "HOY",
+    pasos: [
+      { f: "Hola, Laura 👋 ¿Qué tal ha ido hoy la primera visita con Tamara?", btns: ["😀 Muy bien", "😐 Mejorable"] },
+      { tap: "😀 Muy bien" },
+      { p: "Genial, me ha explicado todo súper bien y con mucha paciencia 😊" },
+      { f: "¡Qué alegría leerte! ¿Nos ayudas con una reseña en Google? Son 30 segundos y a otros pacientes les ayuda mucho a decidirse 💚", enlace: { t: "Clínica Fipod · Google", s: "★★★★★ 4,9 · Escribir una reseña" } },
+      { espera: 1400 },
+      { p: "¡Hecha! ⭐⭐⭐⭐⭐" },
+      { fx: (L) => L.resena(), brindis: "Google · reseña nueva de 5 ★ · ya son 143" },
+      { f: "¡Mil gracias, Laura! Nos vemos en la próxima 🦶" },
+    ],
+  },
+  {
+    id: "vuelven", palabra: "+10", min: 4, citas: 1,
+    kicker: "Miércoles · 10:05 · pacientes que no vuelven",
+    titulo: 'Los pacientes que no vuelven, <em>vuelven.</em>',
+    texto: "Hace casi un año que Carmen se hizo sus plantillas en Fipod. El asistente le recuerda la revisión justo a tiempo y le deja elegir hora. Lo mismo con quien dejó la fisio a medias. Solo a pacientes que han aceptado recibir avisos.",
+    chips: ["Revisión de plantillas", "Tratamientos a medias", "Con consentimiento"],
+    logro: { small: "Visitas recuperadas", big: "+10", sub: "al mes, de pacientes que hoy se olvidan.", c: true },
+    lado: "agenda", hora: "10:05", diaChat: "HOY",
+    agenda: { dia: "Viernes", filas: [["10:30", "Ocupado"], ["12:00", "Ocupado"], ["16:30", null], ["17:30", "Ocupado"], ["19:00", "Ocupado"]] },
+    pasos: [
+      { f: "Hola, Carmen 👋 Hace casi un año que te hiciste tus <strong>plantillas a medida</strong> en Clínica Fipod. Es buen momento para revisarlas y ver que siguen haciendo bien su trabajo. ¿Te busco hueco?", btns: ["Sí, búscame hueco", "Ahora no"], plantilla: true },
+      { tap: "Sí, búscame hueco" },
+      { f: "¡Perfecto! Esta semana Tamara tiene libre:", slots: ["Jue 11:00", "Vie 16:30"] },
+      { tap: "Vie 16:30" },
+      { fx: (L) => L.agendaLlena("16:30", "Carmen L. · revisión", "ha vuelto"), brindis: "Agenda · viernes 16:30 · Carmen L. · revisión ✓" },
+      { card: { cab: "✅ REVISIÓN RESERVADA", filas: [["🗓", "<strong>Viernes, 16:30</strong>"], ["👣", "Revisión de plantillas"], ["👩‍⚕️", "Con Tamara"]], pie: "Trae tus plantillas y el calzado que más uses. ¡Te esperamos!" } },
+      { p: "Perfecto, allí estaré 👍" },
+    ],
+  },
+  {
+    id: "clinico", palabra: "EQUIPO", min: 5, citas: 0,
+    kicker: "Jueves · 16:12 · algo que tiene que ver una profesional",
+    titulo: 'Lo clínico, <em>siempre a vuestro equipo.</em>',
+    texto: "El asistente no da consejo médico. Si un paciente cuenta algo que tiene que valorar una profesional, se lo pasa al equipo al momento, ya resumido, y le dice al paciente qué hacer mientras tanto.",
+    chips: ["Cero consejos clínicos", "Aviso prioritario", "Datos de salud protegidos"],
+    logro: { small: "Casos clínicos que van a una persona", big: "100 %", sub: "Con el resumen hecho: nadie tiene que leerse el chat entero." },
+    lado: "bandeja", hora: "16:12", diaChat: "HOY",
+    pasos: [
+      { p: "Hola, me operasteis la uña el lunes y hoy la tengo bastante roja y me duele más que ayer" },
+      { f: "Gracias por avisar, Pablo. Esto lo tiene que ver Tamara, así que no te voy a dar consejo por aquí. <strong>Le paso tu mensaje ahora mismo como prioritario</strong> y te escribe en cuanto salga de consulta." },
+      { fx: (L) => L.bandeja(), brindis: "Bandeja del equipo · aviso PRIORITARIO para Tamara" },
+      { f: "Si mientras tanto tienes fiebre o empeora mucho, acude a urgencias." },
+      { p: "Vale, gracias" },
+      { espera: 1600 },
+      { fx: (L) => L.bandejaCogida(), brindis: "Tamara ha cogido el aviso ✓" },
+      { f: "Pablo, soy Tamara 👋 Acabo de ver tu mensaje. ¿Me mandas una foto de la uña y te digo ahora mismo?", humano: true },
+    ],
+  },
+  { id: "semana", tipo: "semana", palabra: "LUNES" },
+  { id: "cierre", tipo: "cierre", palabra: "FIPOD" },
+];
+
+/* ── Estado ─────────────────────────────────────────────────────────────── */
+const raiz = $("#raiz");
+let actual = -1, vuelta = 0, auto = false, ocupado = false;
+const hechas = new Set();
+let totMin = 0, totCitas = 0;
+const PARAR = Symbol("parar");
+async function espera(ms, v) { const mia = vuelta; await new Promise(r => setTimeout(r, REDUCIDO ? 0 : ms * VEL)); if (mia !== v) throw PARAR; }
+
+/* puntos de navegación */
+const puntos = $("#puntos");
+ESCENAS.forEach((e, i) => { const b = el("button"); b.setAttribute("aria-label", "Escena " + (i + 1)); b.onclick = () => ir(i); puntos.appendChild(b); });
+
+function contar(nodo, a, b, fmt, dur = 900) {
+  const t0 = performance.now();
+  const paso = (t) => { const k = Math.min(1, (t - t0) / (REDUCIDO ? 1 : dur)); const v = a + (b - a) * (1 - Math.pow(1 - k, 3)); nodo.textContent = fmt(v); if (k < 1) requestAnimationFrame(paso); };
+  requestAnimationFrame(paso);
+}
+function fmtMin(v) { v = Math.round(v); return v < 60 ? v + " min" : Math.floor(v / 60) + " h " + String(v % 60).padStart(2, "0") + " min"; }
+function sumar(esc) {
+  if (hechas.has(esc.id)) return;
+  hechas.add(esc.id);
+  const m0 = totMin, c0 = totCitas; totMin += esc.min || 0; totCitas += esc.citas || 0;
+  contar($("#cMin"), m0, totMin, fmtMin); contar($("#cCitas"), c0, totCitas, (v) => "+" + Math.round(v));
+}
+
+/* ── Piezas del móvil ───────────────────────────────────────────────────── */
+function movil(nombre = "Clínica Fipod", sub = "cuenta de empresa") {
+  const m = el("div", "movil");
+  m.innerHTML = `<div class="pantalla"><div class="isla"></div>
+    <div class="wa-cab"><span class="atr">‹</span><span class="ava">${OMARCA}</span><div><div class="n">${nombre}</div><div class="s">${sub}</div></div></div>
+    <div class="brindis"><i>✓</i><span></span></div>
+    <div class="msgs" role="log" aria-live="polite"></div>
+    <div class="wa-pie"><div class="campo">Mensaje</div><span class="mic">${MIC}</span></div></div>`;
+  return m;
+}
+function hhmm(base, add) { const [h, mi] = base.split(":").map(Number); const t = h * 60 + mi + add; return String(Math.floor(t / 60) % 24).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0"); }
+
+/* ── Tarjeta lateral ────────────────────────────────────────────────────── */
+function lado(esc) {
+  const L = el("aside", "lado");
+  const api = {};
+  if (esc.lado === "agenda") {
+    L.innerHTML = `<h4>Por dentro <span class="vivo">en directo</span></h4><div class="panel"><div class="tit">Agenda · ${esc.agenda.dia}<small>conectada</small></div><div class="fr"></div><div class="estado">✓ Sin solapes: la agenda es la misma que usa el equipo</div></div>`;
+    const fr = $(".fr", L);
+    const filas = {};
+    esc.agenda.filas.forEach(([h, t]) => {
+      const f = el("div", "franja", `<span class="hh">${h}</span><span class="q ${t ? "" : "libre"}">${t || "Libre"}</span>`);
+      fr.appendChild(f); filas[h] = $(".q", f);
+    });
+    api.agendaLlena = (h, t, etiqueta) => { const q = filas[h]; if (!q) return; q.className = "q nueva"; q.innerHTML = `<span>${t}</span><em>${etiqueta}</em>`; };
+    api.agendaLibera = (h) => { const q = filas[h]; if (!q) return; q.className = "q libre"; q.textContent = "Libre"; };
+    api.agendaEspera = (h, t) => { const q = filas[h]; if (!q) return; q.className = "q espera"; q.textContent = t; };
+  } else if (esc.lado === "datos") {
+    L.innerHTML = `<h4>Por dentro <span class="vivo">en directo</span></h4><div class="panel"><div class="tit">Datos de Fipod que usa<small>solo estos</small></div><div class="ds"></div><div class="estado">✓ Lo que no está aquí, lo pasa al equipo</div></div>`;
+    const ds = $(".ds", L); const d = {};
+    esc.datos.forEach(([k, a, b]) => { const n = el("div", "dato", `<span class="tk">✓</span><div>${a}<small>${b}</small></div>`); ds.appendChild(n); d[k] = n; });
+    api.dato = (k) => d[k] && d[k].classList.add("ok");
+  } else if (esc.lado === "google") {
+    L.innerHTML = `<h4>Por dentro <span class="vivo">en directo</span></h4><div class="panel"><div class="tit">Vuestra ficha de Google<small>pública</small></div><div class="gficha"><div class="nm">Clínica Fipod</div><div class="nota"><b>4,9</b><span class="estr">★★★★★</span><span><span class="cnt">142</span> reseñas</span></div></div><div class="rs"></div><div class="estado">✓ Las valoraciones flojas van antes a la clínica</div></div>`;
+    api.resena = () => { const c = $(".cnt", L); c.textContent = "143"; c.classList.add("sube"); $(".rs", L).appendChild(el("div", "resena", `<div class="q1">Laura M. <span class="estr">★★★★★</span></div><div style="margin-top:4px">«Me explicó todo súper bien y con mucha paciencia.»</div><small>hace un momento</small>`)); };
+  } else if (esc.lado === "bandeja") {
+    L.innerHTML = `<h4>Por dentro <span class="vivo">en directo</span></h4><div class="panel bandeja"><div class="tit">Bandeja del equipo<small>privada</small></div><div class="bj"><div class="vacia">Nada pendiente. El asistente está con los pacientes.</div></div><div class="estado">✓ Datos de salud: solo los ve el equipo</div></div>`;
+    api.bandeja = () => { $(".bj", L).innerHTML = `<div class="it"><span class="pr">● Prioritario</span><div class="nm">Pablo G. · para Tamara</div><ul><li>Operado de uña encarnada el lunes</li><li>Hoy: más enrojecimiento y más dolor</li><li>Pide que lo valore una profesional</li></ul><div class="quien">⏳ Esperando a Tamara…</div></div>`; };
+    api.bandejaCogida = () => { const q = $(".quien", L); if (q) { q.className = "quien ok"; q.textContent = "✓ Tamara lo ha cogido · 16:14"; } };
+  }
+  return { L, api };
+}
+
+/* ── Escena de conversación ─────────────────────────────────────────────── */
+async function escenaChat(esc, v) {
+  const s = el("section", "escena dentro");
+  const t = el("div", "texto");
+  t.innerHTML = `<div class="kicker"><i></i>${esc.kicker}</div><h2>${esc.titulo}</h2><p>${esc.texto}</p>
+    <div class="chips">${esc.chips.map((c, i) => `<span class="chip ${i === 1 ? "c" : ""}">${c}</span>`).join("")}</div>
+    <div class="logro pend"><div class="caja ${esc.logro.c ? "c" : ""}"><small>${esc.logro.small}</small><b>${esc.logro.big}</b></div><span>${esc.logro.sub}</span></div>`;
+  const m = movil();
+  const { L, api } = lado(esc);
+  s.append(t, m, L);
+  raiz.replaceChildren(s);
+  const msgs = $(".msgs", m), campo = $(".campo", m), sub = $(".s", m), brindis = $(".brindis", m);
+  msgs.appendChild(el("div", "dia", esc.diaChat));
+  msgs.appendChild(el("div", "aviso-ia", "🤖 Te atiende el asistente de Clínica Fipod. Lo clínico lo valora siempre el equipo."));
+  let min = 0, ultimosBtns = null;
+  const bajar = () => { msgs.scrollTop = msgs.scrollHeight; };
+  const hora = () => hhmm(esc.hora, Math.floor(min));
+  const ver = (txt) => { brindis.querySelector("span").textContent = txt; brindis.classList.add("on"); clearTimeout(brindis._t); brindis._t = setTimeout(() => brindis.classList.remove("on"), 2600 * Math.max(VEL, .3)); };
+  await espera(650, v);
+  for (const p of esc.pasos) {
+    if (p.espera) { await espera(p.espera, v); }
+    if (p.p) {
+      // el paciente escribe
+      sub.textContent = "en línea";
+      campo.classList.add("lleno");
+      const n = p.p.length, pasos = Math.min(n, 28);
+      for (let i = 1; i <= pasos; i++) { campo.textContent = p.p.slice(0, Math.round(n * i / pasos)); await espera(22, v); }
+      await espera(260, v);
+      campo.textContent = "Mensaje"; campo.classList.remove("lleno");
+      msgs.appendChild(el("div", "msg pac", `${p.p}<span class="h">${hora()}</span>`)); bajar();
+      min += .5;
+      await espera(500, v);
+    }
+    if (p.tap) {
+      if (ultimosBtns) {
+        const b = [...ultimosBtns.querySelectorAll("button")].find(x => x.dataset.t === p.tap);
+        if (b) { b.classList.add("tap"); ultimosBtns.classList.add("usado"); }
+      }
+      await espera(450, v);
+      msgs.appendChild(el("div", "msg pac", `${p.tap}<span class="h">${hora()}</span>`)); bajar();
+      await espera(450, v);
+    }
+    if (p.f || p.card) {
+      sub.textContent = "escribiendo…"; sub.classList.add("esc");
+      const pen = el("div", "msg fip pensando", '<div class="puntitos"><span></span><span></span><span></span></div>');
+      msgs.appendChild(pen); bajar();
+      const largo = (p.f || "").replace(/<[^>]+>/g, "").length;
+      await espera(p.humano ? 1500 : Math.min(1500, 520 + largo * 6), v);
+      pen.remove();
+      sub.textContent = p.humano ? "Tamara · en línea" : "cuenta de empresa"; sub.classList.remove("esc");
+      if (p.card) {
+        const c = p.card;
+        msgs.appendChild(el("div", "msg fip tarjeta", `<div class="cab">${c.cab}</div>${c.filas.map(([i, x]) => `<div class="fil"><i>${i}</i><span>${x}</span></div>`).join("")}<div class="pi">${c.pie}</div><span class="h">${hora()}</span><div style="clear:both"></div>`));
+      } else if (p.enlace) {
+        msgs.appendChild(el("div", "msg fip enlace", `<div class="pre"><span class="ic">${OMARCA.replace('viewBox', 'height="24" viewBox')}</span><div><b>${p.enlace.t}</b><small><span class="estr">${p.enlace.s.slice(0, 5)}</span>${p.enlace.s.slice(5)}</small></div></div><div class="tx">${p.f}<span class="h">${hora()}</span></div>`));
+      } else if (p.mapa) {
+        msgs.appendChild(el("div", "msg fip enlace", `<div class="mapa" aria-hidden="true"></div><div class="tx">${p.f}<span class="h">${hora()}</span></div>`));
+      } else {
+        const pre = p.humano ? '<div style="font-size:11.5px;font-weight:800;color:#0f7a43;margin-bottom:2px">Tamara · Clínica Fipod</div>' : "";
+        const pl = p.plantilla ? '<div style="font-size:10.5px;font-weight:700;color:#8696a0;margin-bottom:3px">Aviso de Clínica Fipod</div>' : "";
+        msgs.appendChild(el("div", "msg fip", `${pre}${pl}${p.f}<span class="h">${hora()}</span>`));
+      }
+      bajar();
+      min += .4;
+      if (p.btns || p.slots) {
+        await espera(250, v);
+        const lista = p.btns || p.slots;
+        const g = el("div", "rbtns" + ((p.slots || p.grid) ? " grid" : ""));
+        lista.forEach(x => { const b = el("button", "", x); b.dataset.t = x; b.tabIndex = -1; g.appendChild(b); });
+        msgs.appendChild(g); ultimosBtns = g; bajar();
+        await espera(950, v);
+      } else {
+        await espera(650, v);
+      }
+    }
+    if (p.fx) { p.fx(api); if (p.brindis) ver(p.brindis); await espera(700, v); }
+  }
+  // logro
+  const lg = $(".logro", t); lg.classList.remove("pend");
+  const big = $(".caja b", lg); big.animate([{ transform: "scale(.8)", opacity: .3 }, { transform: "scale(1.08)" }, { transform: "none", opacity: 1 }], { duration: REDUCIDO ? 1 : 600, easing: "cubic-bezier(.2,.8,.3,1.2)" });
+  sumar(esc);
+}
+
+/* ── Portada ────────────────────────────────────────────────────────────── */
+async function escenaPortada(v) {
+  const s = el("section", "escena dentro portada");
+  s.innerHTML = `<div class="texto"><div class="kicker"><i></i>Demo para Tamara · Clínica Fipod</div>
+    <h1>Fipod, contestando <em>sola</em> por WhatsApp. <span class="c">De día y de noche.</span></h1>
+    <p>Seis momentos de una semana normal en la clínica, y lo que hace el asistente mientras vuestro equipo atiende a sus pacientes: da citas, recuerda, recupera a quien no vuelve, consigue reseñas y pasa lo clínico a una profesional.</p>
+    <div class="cta"><button class="pri" id="bEmp">Empezar la demo <span aria-hidden="true">→</span></button><button class="sec" id="bEmpAuto">▶ Verla en automático</button></div>
+    <div class="nota-pie">Pacientes y conversaciones de ejemplo. Precios, horario, dirección y equipo, los reales de Clínica Fipod.</div></div>`;
+  const m = movil("WhatsApp Business", "Clínica Fipod · bandeja");
+  const pan = $(".pantalla", m);
+  $(".msgs", m).remove(); $(".wa-pie", m).remove(); $(".brindis", m).remove();
+  const lista = el("div", "lista"); lista.innerHTML = '<div class="busca">🔍 Buscar</div>'; pan.appendChild(lista);
+  s.appendChild(m);
+  const cinta = el("div", "cinta"); const txt = "Citas 24/7 ● Recordatorios ● Menos huecos perdidos ● Pacientes que vuelven ● Más reseñas en Google ● Lo clínico, a vuestro equipo ● ";
+  cinta.innerHTML = `<div>${txt.repeat(6)}</div>`;
+  raiz.replaceChildren(s, cinta);
+  $("#bEmp").onclick = () => ir(1);
+  $("#bEmpAuto").onclick = () => { ponAuto(true); ir(1); };
+  const chats = [["L", "#e4774f", "Laura M.", "¿Me podéis ver esta semana?", "23:47"], ["J", "#4d8fdc", "Javier R.", "Cambiar la cita", "09:02"], ["M", "#8a6fd6", "Marta S.", "¿Cuánto cuesta la sesión de fisio?", "11:20"], ["C", "#d6a33b", "Carmen L.", "Sí, búscame hueco", "10:06"], ["P", "#3fae86", "Pablo G.", "Me operasteis la uña el lunes y…", "16:12"], ["A", "#d65f8a", "Ana P.", "¡Me quedo el hueco de las 10!", "09:15"]];
+  const filas = [];
+  for (const [a, col, n, t, h] of chats) {
+    await espera(420, v);
+    const f = el("div", "ch", `<span class="av" style="background:${col}">${a}</span><div class="md"><b>${n}</b><span>${t}</span></div><div class="rt"><span>${h}</span><i>1</i></div>`);
+    lista.appendChild(f); filas.push(f);
+  }
+  await espera(700, v);
+  for (const f of filas) {
+    await espera(380, v);
+    $(".md span", f).textContent = "✓ Respondido por el asistente"; $(".md span", f).classList.add("res");
+    const rt = $(".rt", f); rt.classList.add("hecho"); $("i", rt).remove();
+  }
+}
+
+/* ── Panel semanal ─────────────────────────────────────────────────────── */
+async function escenaSemana(v) {
+  const s = el("section", "semana dentro escena-semana");
+  s.style.animation = "entra .55s cubic-bezier(.2,.75,.2,1) both";
+  s.innerHTML = `<div class="kicker"><i></i>Lo que ve Tamara cada lunes · una semana de ejemplo</div>
+    <h2>Todo, en un panel. <em>En horas y en citas.</em></h2>
+    <div class="kpis">
+      <div class="kpi m"><small>Tiempo devuelto al equipo</small><b data-n="155" data-f="min">0</b><span>de teléfono y WhatsApp, esta semana</span></div>
+      <div class="kpi"><small>Citas dadas por el asistente</small><b data-n="23">0</b><span>9 de ellas con la clínica cerrada</span></div>
+      <div class="kpi"><small>Huecos recuperados</small><b data-n="4">0</b><span>cambios y lista de espera</span></div>
+      <div class="kpi"><small>Resueltas sin persona</small><b data-n="92" data-f="pct">0</b><span>el resto, al equipo con resumen</span></div>
+    </div>
+    <div class="duo">
+      <div class="caja2"><h3>En directo <small>● ahora</small></h3><div class="feed" id="feed"></div></div>
+      <div class="caja2"><h3>Citas dadas por el asistente <small>por día</small></h3><div class="barras" id="barras"></div>
+        <div class="leyenda"><span><i style="background:var(--menta)"></i>en horario</span><span><i style="background:var(--acento)"></i>con la clínica cerrada</span></div></div>
+    </div>`;
+  raiz.replaceChildren(s);
+  await espera(350, v);
+  s.querySelectorAll(".kpi b").forEach(b => { const n = +b.dataset.n, f = b.dataset.f; contar(b, 0, n, f === "min" ? fmtMin : f === "pct" ? (x) => Math.round(x) + " %" : (x) => String(Math.round(x)), 1300); });
+  const dias = [["lun", 4, 1], ["mar", 3, 0], ["mié", 4, 1], ["jue", 3, 0], ["vie", 3, 1], ["sáb", 3, 3], ["dom", 3, 3]];
+  const bar = $("#barras", s);
+  dias.forEach(([d, n, cerr]) => { bar.appendChild(el("div", "b", `<div class="col" data-v="${n}" style="background:linear-gradient(to top,var(--menta) ${(n - cerr) / n * 100}%,var(--acento) ${(n - cerr) / n * 100}%)"></div><small>${d}</small>`)); });
+  await espera(250, v);
+  bar.querySelectorAll(".col").forEach((c, i) => setTimeout(() => { c.style.height = (dias[i][1] / 4.6 * 100) + "%"; }, REDUCIDO ? 0 : i * 90 * VEL));
+  const feed = $("#feed", s);
+  const items = [["🗓", "Laura M. · cita reservada a las 23:47", "+1 cita"], ["🔁", "Javier R. pasa a la tarde · Ana P. coge su hueco", "0 huecos perdidos"], ["⭐", "Laura M. · reseña de 5 ★ en Google", "143"], ["👣", "Carmen L. · vuelve a revisión", "+1 cita"]];
+  for (const [i, tx, e] of items) { await espera(520, v); feed.appendChild(el("div", "", `<i>${i}</i><span>${tx}</span><em>${e}</em>`)); }
+}
+
+/* ── Cierre ─────────────────────────────────────────────────────────────── */
+async function escenaCierre(v) {
+  const s = el("section", "semana dentro cierre");
+  s.style.animation = "entra .55s cubic-bezier(.2,.75,.2,1) both";
+  s.innerHTML = `<div class="kicker"><i></i>Lo que traería a Clínica Fipod</div>
+    <h2>Más pacientes atendidos, <em>menos horas al teléfono.</em> <span class="c">Cada mes.</span></h2>
+    <div class="tiles">
+      <div class="tile"><b>≈ 10 h</b><span>de teléfono y WhatsApp que vuelven a la consulta.</span><em>Cada mes</em></div>
+      <div class="tile c"><b>≈ 9</b><span>huecos al mes que ya no se pierden: se cambian o se vuelven a ocupar.</span><em>≈ 315 € al mes</em></div>
+      <div class="tile"><b>+10</b><span>revisiones al mes de pacientes que hoy se olvidan de volver.</span><em>≈ 350 € al mes</em></div>
+      <div class="tile c"><b>24/7</b><span>citas también de noche y en fin de semana, cuando nadie coge el teléfono.</span><em>Sin turnos extra</em></div>
+      <div class="tile"><b>★ +</b><span>más reseñas en Google, que hacen subir a Fipod en las búsquedas.</span><em>Suma al SEO</em></div>
+    </div>
+    <div class="total"><b>≈ 665 € y 10 horas al mes</b><span>solo con lo que hace el asistente, sin contar los pacientes nuevos que traen la web y Google.</span></div>
+    <div class="pasos">
+      <div class="paso"><i>1</i><span><strong>Lo instalamos nosotros:</strong> conectamos vuestro WhatsApp y vuestra agenda, sin cambiar vuestra forma de trabajar.</span></div>
+      <div class="paso"><i>2</i><span><strong>Habla como Fipod:</strong> con vuestros servicios, precios y horarios. Lo que no sabe, no se lo inventa.</span></div>
+      <div class="paso"><i>3</i><span><strong>Lo clínico, a vuestro equipo.</strong> Y los datos de salud, protegidos con contrato de encargado del tratamiento (RGPD).</span></div>
+    </div>
+    <div class="notita">Cuentas de ejemplo, las mismas de la propuesta: 300 citas al mes, un 6 % que no se presenta (se recupera la mitad) y 35 € de media por visita. Con la fisio a 48 €, sale más. Se ajustan con vuestros números.</div>
+    <div class="cta"><button class="pri" id="bOtra">↻ Verla otra vez</button><a class="sec" href="https://htremc.github.io/clinica-fipod/" target="_blank" rel="noopener">Ver la web de Fipod →</a><span class="nota-pie" style="margin:0">Hecho por COMPOUND · Meta Tech Provider</span></div>`;
+  raiz.replaceChildren(s);
+  $("#bOtra").onclick = () => { ponAuto(false); ir(0); };
+  s.querySelectorAll(".tile").forEach((t, i) => t.animate([{ opacity: 0, transform: "translateY(16px)" }, { opacity: 1, transform: "none" }], { duration: REDUCIDO ? 1 : 520, delay: REDUCIDO ? 0 : 180 + i * 110, fill: "backwards", easing: "cubic-bezier(.2,.75,.2,1)" }));
+  await espera(100, v);
+}
+
+/* ── Navegación ─────────────────────────────────────────────────────────── */
+let tAuto = null;
+async function ir(i) {
+  if (i < 0 || i >= ESCENAS.length) return;
+  clearTimeout(tAuto);
+  const v = ++vuelta;
+  const viejo = raiz.firstElementChild;
+  if (viejo && actual !== -1 && !REDUCIDO) { [...raiz.children].forEach(c => c.classList.add("fuera")); await new Promise(r => setTimeout(r, 260)); if (v !== vuelta) return; }
+  actual = i;
+  const esc = ESCENAS[i];
+  document.body.dataset.escena = esc.id;
+  $("#palabra").textContent = esc.palabra || "";
+  [...puntos.children].forEach((b, k) => b.classList.toggle("on", k === i));
+  $("#prog").style.width = (i / (ESCENAS.length - 1) * 100) + "%";
+  $("#num").textContent = (i + 1) + "/" + ESCENAS.length;
+  $("#bAnt").disabled = i === 0;
+  const sig = $("#bSig"); sig.classList.remove("listo"); sig.disabled = i === ESCENAS.length - 1; sig.style.visibility = i === ESCENAS.length - 1 ? "hidden" : "visible";
+  history.replaceState(null, "", "#" + esc.id);
+  try {
+    if (esc.tipo === "portada") await escenaPortada(v);
+    else if (esc.tipo === "semana") await escenaSemana(v);
+    else if (esc.tipo === "cierre") await escenaCierre(v);
+    else await escenaChat(esc, v);
+    if (v !== vuelta) return;
+    document.body.dataset.listo = esc.id;
+    sig.classList.add("listo");
+    if (auto && i < ESCENAS.length - 1) tAuto = setTimeout(() => { if (v === vuelta) ir(i + 1); }, (i === 0 ? 1800 : 3600) * VEL);
+  } catch (e) { if (e !== PARAR) { console.error(e); } }
+}
+function ponAuto(on) { auto = on; const b = $("#bAuto"); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); if (on && document.body.dataset.listo === ESCENAS[actual]?.id && actual < ESCENAS.length - 1) tAuto = setTimeout(() => ir(actual + 1), 1500 * VEL); if (!on) clearTimeout(tAuto); }
+$("#bSig").onclick = () => ir(actual + 1);
+$("#bAnt").onclick = () => ir(actual - 1);
+$("#bRep").onclick = () => ir(actual);
+$("#bAuto").onclick = () => ponAuto(!auto);
+$("#bPant").onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.().catch(() => {}); };
+addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  if ((k === " " || k === "Enter") && e.target.closest && e.target.closest("button,a")) return;
+  if (["ArrowDown", "ArrowRight", "PageDown", " "].includes(k)) { e.preventDefault(); ir(actual + 1); }
+  else if (["ArrowUp", "ArrowLeft", "PageUp"].includes(k)) { e.preventDefault(); ir(actual - 1); }
+  else if (k === "r" || k === "R") ir(actual);
+  else if (k === "a" || k === "A") ponAuto(!auto);
+  else if (k === "f" || k === "F") $("#bPant").click();
+  else if (k === "Home") ir(0);
+});
+let tRueda = 0;
+addEventListener("wheel", (e) => {
+  if (e.target.closest && e.target.closest(".msgs, .semana")) { const sc = e.target.closest(".msgs, .semana"); if (sc.scrollHeight > sc.clientHeight + 4) return; }
+  const now = Date.now(); if (now - tRueda < 900 || Math.abs(e.deltaY) < 30) return; tRueda = now; ir(actual + (e.deltaY > 0 ? 1 : -1));
+}, { passive: true });
+let x0 = null, y0 = null;
+addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+addEventListener("touchend", (e) => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.4) ir(actual + (dx < 0 ? 1 : -1)); x0 = null; }, { passive: true });
+
+const inicio = Q.has("escena") ? Math.max(0, Math.min(ESCENAS.length - 1, +Q.get("escena"))) : Math.max(0, ESCENAS.findIndex(e => "#" + e.id === location.hash));
+if (Q.has("auto")) ponAuto(true);
+ir(inicio);
+window.__demo = { ir, get actual() { return actual; }, ESCENAS };
+})();
+</script>
+</body>
+</html>
